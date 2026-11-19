@@ -7,6 +7,7 @@ import altair as alt
 TITANIC_DATA_URL = "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/titanic.csv"
 FEATURE_COLUMNS = ["survived", "pclass", "sex", "age", "fare", "embarked"]
 AGE_GROUPS = ["Child", "Teen", "Young Adult", "Adult", "Older Adult"]
+EMBARKED_CODES = {"C": 0, "Q": 1, "S": 2}
 CLASS_LABELS = {1: "First", 2: "Second", 3: "Third"}
 CLASS_ORDER = ["First", "Second", "Third"]
 CLASS_COLORS = ["#c65a46", "#248277", "#d39a34"]
@@ -47,12 +48,9 @@ def prepare_data(raw_data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd
         bins=[float("-inf"), 12, 18, 35, 60, float("inf")],
         labels=AGE_GROUPS,
     )
-    encoded_data = pd.get_dummies(
-        analysis_data,
-        columns=["sex", "embarked"],
-        prefix={"sex": "sex", "embarked": "embarked"},
-        dtype=int,
-    )
+    encoded_data = analysis_data.copy()
+    encoded_data["sex_female"] = analysis_data["sex"].eq("female").astype(int)
+    encoded_data["embarked_code"] = analysis_data["embarked"].map(EMBARKED_CODES).astype(int)
     return analysis_data, encoded_data, missing_before, missing_after
 
 
@@ -347,20 +345,21 @@ with preparation_tab:
         )
 
     with st.expander("4. Dummy coding", expanded=False):
-        st.caption("Sex and embarked are represented by indicator columns; survived is not encoded.")
-        dummy_columns = [
-            column
-            for column in encoded_data.columns
-            if column.startswith(("sex_", "embarked_"))
-        ]
-        dummy_preview = pd.concat(
+        st.caption(
+            "Sex uses one binary dummy (female=1, male=0). Embarked has three categories, "
+            "so its single column uses nominal codes (C=0, Q=1, S=2), not a dummy variable. "
+            "Survived is not encoded."
+        )
+        encoded_preview = pd.concat(
             [
                 analysis_data.loc[:, ["sex", "embarked"]].head(5).add_prefix("Original: "),
-                encoded_data.loc[:, dummy_columns].head(5).add_prefix("Dummy: "),
+                encoded_data.loc[:, ["sex_female", "embarked_code"]]
+                .head(5)
+                .add_prefix("Encoded: "),
             ],
             axis=1,
         )
-        st.dataframe(dummy_preview, hide_index=True, width="stretch")
+        st.dataframe(encoded_preview, hide_index=True, width="stretch")
 
 with data_tab:
     st.subheader("Passenger records")
@@ -386,10 +385,7 @@ with data_tab:
             "fare",
             "fare_norm",
             "sex_female",
-            "sex_male",
-            "embarked_C",
-            "embarked_Q",
-            "embarked_S",
+            "embarked_code",
         ]
         default_columns = [column for column in default_columns if column in view_data.columns]
 
