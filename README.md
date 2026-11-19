@@ -1,25 +1,21 @@
-# 🎈 Blank app template
+# Titanic Passenger Insights
 
-A simple Streamlit app template for you to modify!
+An interactive dashboard for exploring Titanic survival patterns and the data preparation behind the analysis.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+## Run locally
 
-### How to run it on your own machine
+Install the project dependencies and start Streamlit:
 
-Prerequisite: install `uv` if you don't already have it.
-
+```bash
+uv sync
+uv run streamlit run app.py
 ```
-$ curl -LsSf https://astral.sh/uv/install.sh | sh
-```
 
-1. Sync the dependencies
+## Publish a shareable app
 
-   ```
-   $ uv sync
-   ```
+1. Push this repository to GitHub.
+2. In Streamlit Community Cloud, create an app and select this repository, the desired branch, and `app.py` as the main file.
+3. Deploy the app, then copy its public `*.streamlit.app` URL.
+4. Submit that URL through the course submission form. A `localhost` URL only works on your own machine.
 
-2. Run the app
-
-   ```
-   $ uv run streamlit run streamlit_app.py
-   ```
+Dependencies for hosted deployment are listed in `requirements.txt`.
